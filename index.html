@@ -1,0 +1,111 @@
+<html>
+<script src="d3.js"></script>
+<script src="d3.layout.cloud.js"></script>
+<head>
+    <style>
+    .word_cloud{
+      border: 2px solid black;
+    }
+    </style>
+    <title>TwitterOlympicTrends</title>
+</head>
+<style>
+    body {
+        font-family:"Lucida Grande","Droid Sans",Arial,Helvetica,sans-serif;
+    }
+    .legend {
+        border: 1px solid #555555;
+        border-radius: 5px 5px 5px 5px;
+        font-size: 0.8em;
+        margin: 10px;
+        padding: 8px;
+    }
+    .bld {
+        font-weight: bold;
+    }
+</style>
+<body>
+
+</body>
+<script>
+
+    d3.json('word_freq.json',boo);
+
+
+    var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20,100])
+            .range(["#ddd", "#ccc", "#bbb", "#aaa", "#999", "#888", "#777", "#666", "#555", "#444", "#333", "#222"]);
+            //.range(["#C74545", "#C846A5", "#A546C8", "#5546C8", "#4692C8", "#46C8AE", "#46C84A", "#8BC846", "#C8A346", "#C86F46", "#333", "#222"]);
+
+    function boo(data){
+    var words=[];
+    for(var k in data){
+      var n={}
+      n['text']=k;
+      n['size']=data[k];
+      if (Math.log(data[k])!=0)
+        words.push(n)
+    }
+
+    words.sort(function (a, b) {
+    if (a.size > b.size) {
+      return -1;
+    }
+    if (a.size < b.size) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+    });
+
+    avg=0
+    for (i=0;i<3;i++){
+      avg+=words[i].size;
+    }
+    avg=avg/3;
+
+    for(i=0;i<100;i++){
+      words[i].size=words[i].size*(110/avg);
+    }
+
+    d3.layout.cloud().size([1400,600])
+            .words(words.slice(1,100))
+            .rotate(0)
+            .fontSize(function(d) { return d.size; })
+            .on("end", draw)
+            .start();
+          }
+
+    function draw(words) {
+        var svg=d3.select("#word_cloud").append("svg")
+                .attr("width", "95%")
+                .attr("height", "80%")
+                .attr("class", "wordcloud")
+                .append("g")
+                .attr("width", "95%")
+                .attr("height", "90%")
+                .attr("class", "wordcloudg")
+
+                // without the transform, words words would get cutoff to the left and top, they would
+                // appear outside of the SVG area
+                .attr("transform", "translate(500,300)")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size + "px"; })
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+      
+    }
+</script>
+<center>
+<img src="imgs/Twitterbird.png" height="80px" width="80px"/>
+<img src="imgs/Olympic_Rings.png" height="80px" width="200px"/>
+<br>
+</center>
+<div id="word_cloud" class="word_cloud"></div>
+
+</html>
