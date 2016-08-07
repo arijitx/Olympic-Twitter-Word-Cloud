@@ -20,7 +20,7 @@ ACCESS_SECRET = '2uKoxZGiGqIynj7B4tUsN0YIrSLvyCbLo1sijqUsmEM7j'#keep the quotes,
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
-special_stopwords=['http','olympic','rt','rio','games','2016']
+special_stopwords=['http.* ','http.*$','olympic','rt','rio','games','2016']
 counter=0
 set_t=False
 t=time.time()
@@ -59,6 +59,8 @@ def update_word_freq(freq):
         word_freq_next=dict(Counter(freq)+Counter(word_freq_next))
 
     if set_t and ((time.time()-t))>interval :
+        with open("word_freq_at_"+str(int(time.time()))+".json", "w") as outfile:
+            json.dump(word_freq_map, outfile,cls=MyEncoder, indent=4)
         print 'Swaping Update . . . '
         word_freq_map=word_freq_next
         word_freq_next=defaultdict(int)

@@ -1,4 +1,5 @@
 <html>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="d3.js"></script>
 <script src="d3.layout.cloud.js"></script>
 <head>
@@ -12,18 +13,20 @@
       background-attachment: fixed;
       background-position: center; 
     }
-    </style>
-    <title>TwitterOlympicTrends</title>
-</head>
-<style>
     body {
         font-family:"Lucida Grande","Droid Sans",Arial,Helvetica,sans-serif;
     }
     
-    .bld {
-        font-weight: bold;
+    .lb-lg {
+        font-size: 30px;
+        margin-left: 20px;
+        float: left;
+        margin-top: 15px;
     }
-</style>
+    </style>
+    <title>TwitterOlympicTrends</title>
+</head>
+
 <body>
 
 </body>
@@ -39,7 +42,6 @@
 
     function boo(data){
     var words=[];
-    console.log(data);
     for(var k in data){
       var n={};
       n['text']=k;
@@ -58,7 +60,7 @@
     // a must be equal to b
     return 0;
     });
-    console.log(words);
+    var most_used_words=document.getElementById('most_used_words');
     avg=0;
     for (i=0;i<3;i++){
       avg+=words[i].size;
@@ -66,7 +68,12 @@
     avg=avg/3;
 
     for(i=0;i<80;i++){
-      words[i].size=words[i].size*(110/avg);
+        words[i].size=words[i].size*(110/avg);
+        var newSpan = document.createElement('span');
+        newSpan.setAttribute("class","label label-primary lb-lg");
+        newSpan.innerHTML=words[i].text;
+        most_used_words.appendChild(newSpan);
+      
     }
     d3.layout.cloud().size([1400,600])
             .words(words.slice(1,80))
@@ -105,8 +112,13 @@
 <center>
 <img src="imgs/Twitterbird.png" height="80px" width="80px"/>
 <img src="imgs/Olympic_Rings.png" height="80px" width="200px"/>
+<hr>
 <br>
 </center>
 <div id="word_cloud" class="word_cloud"></div>
+<hr>
+<h1>Trending Keywords Related to Olympic</h1>
+<br><br>
+<div id="most_used_words"></div>
 
 </html>
