@@ -9,6 +9,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 table = string.maketrans("","")
 word_freq_map=defaultdict(int)
+word_freq_next=defaultdict(int)
 count_vect = CountVectorizer(analyzer='word',stop_words='english')
 
 CONSUMER_KEY = 'jrkcjINAfIEqoGpQ7tb13DIhk'
@@ -20,6 +21,11 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 api = tweepy.API(auth)
 special_stopwords=['http','olympic','rt','rio']
+counter=0
+set_t=False
+t=time.time()
+interval=900
+write_thresh=50
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -34,30 +40,61 @@ class MyEncoder(json.JSONEncoder):
 
 def update_word_freq(freq):
     global word_freq_map
+    global word_freq_next
+    global counter
+    global t
+    global set_t
+
+    counter+=1
+
+    
     word_freq_map=dict(Counter(freq)+Counter(word_freq_map))
-    with open("word_freq.json", "w") as outfile:
-        json.dump(word_freq_map, outfile,cls=MyEncoder, indent=4)
+
+    if not set_t and ((time.time()-t)/1000)>interval:
+        set_t=True
+        t=time.time()
+
+
+
+    if set_t:
+        word_freq_next=dict(Counter(freq)+Counter(word_freq_next))
+
+    if set_t and ((time.time()-t)/1000)>interval :
+        print 'Swaping Update . . . '
+        word_freq_map=word_freq_next
+        word_freq_next=defaultdict(int)
+        set_t=False
+        t=time.time()
+
+    
+    if counter==write_thresh:
+        print 'JSON Update . . '
+        counter=0
+        with open("word_freq.json", "w") as outfile:
+            json.dump(word_freq_map, outfile,cls=MyEncoder, indent=4)
 
 def cloud_map(text):
     global table
     try:
         text=text.translate(table, string.punctuation)
         for w in special_stopwords:
-            text=re.sub(w+".*","",text.lower())
+            text=re.sub(w,"",text.lower())
+            #print w+'_moved_    ------ >>>   '+text
+        #print "After : "+text
         X = count_vect.fit_transform(text.split('\n'))
         vocab = list(count_vect.get_feature_names())
         counts = X.sum(axis=0).A1
         freq_distribution = Counter(dict(zip(vocab, counts)))
         update_word_freq(freq_distribution)
     except:
-        pass
+        print sys.exc_info()[0]
+        raise
 
 class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         #print status.author.name
         status._json['text']=status._json['text'].encode('ascii','ignore')
-        #print status._json['text']
         cloud_map(status._json['text'])
             # db.tweets.insert_one(status._json)
         # tw["prof_img"]=tweet.author.profile_image_url
@@ -81,6 +118,7 @@ def startStreaming(q):
     myStream.filter(track=[q])
 
 print 'Streaming . . .'
+# startStreaming(sys.argv[1])
 while True:
     try:
         print 'start in try '
