@@ -5,6 +5,12 @@
     <style>
     .word_cloud{
       border: 2px solid black;
+      height: 90%;
+      width: 100%;
+      background-image: url('imgs/loading.gif');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center; 
     }
     </style>
     <title>TwitterOlympicTrends</title>
@@ -13,13 +19,7 @@
     body {
         font-family:"Lucida Grande","Droid Sans",Arial,Helvetica,sans-serif;
     }
-    .legend {
-        border: 1px solid #555555;
-        border-radius: 5px 5px 5px 5px;
-        font-size: 0.8em;
-        margin: 10px;
-        padding: 8px;
-    }
+    
     .bld {
         font-weight: bold;
     }
@@ -28,7 +28,7 @@
 
 </body>
 <script>
-
+    
     d3.json('word_freq.json',boo);
 
 
@@ -77,9 +77,10 @@
     }
 
     function draw(words) {
+        document.getElementById('word_cloud').style.backgroundImage="none";
         var svg=d3.select("#word_cloud").append("svg")
                 .attr("width", "95%")
-                .attr("height", "80%")
+                .attr("height", "100%")
                 .attr("class", "wordcloud")
                 .append("g")
                 .attr("width", "95%")
