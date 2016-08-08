@@ -4,4 +4,4 @@ This python project streams twitter for tweets related to Olympic and portrays t
 <center><img src="imgs/screenshot.png"/></center><br>
 Live Demo : http://arijitgeek.me/others/olympic_project/
 
-### D3 CLoud https://github.com/jasondavies/d3-cloud
+D3 CLoud https://github.com/jasondavies/d3-cloud
